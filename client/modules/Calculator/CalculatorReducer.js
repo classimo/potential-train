@@ -1,38 +1,27 @@
 /**
  * Created by paulius on 05/09/16.
  */
-import { CALCULATE, SWITCH_CALCULATOR, calculate, calculatorType } from './actions';
+import { CALCULATE } from './Actions';
 
 const initialState = {
-    isLoanAmount: true,
-    calculator: {
-        amountPerMonth: 250,
-        apr: 10,
-        loanAmount: 1000,
-        termMonths: 6
-    }
+    calculatedValues: {},
 };
 
-function calculator(state = initialState, action) {
+function CalculatorReducer(state = initialState, action) {
     switch (action.type){
-        case SWITCH_CALCULATOR:
-            return Object.assign({}, state, {
-                isLoanAmount: action.isLoanAmount
-            });
         case CALCULATE:
-            return Object.assign({}, state, {
-                calculated: calculateValues(state)
-            });
+            return { calculatedValues: calculateValues(action.calculatorValues) };
         default:
             return state;
     }
 }
 
 //Selectors
-export const getCalculatedValues = state => state.calculator.calculated;
-export const getIsLoanAmount = state => state.calculator.isLoanAmount;
+export const getCalculatedValues = state => state.calculatorReducer.calculatedValues;
 
-function calculateValues(state) {
+export default CalculatorReducer;
+
+function calculateValues(calculatorValues) {
     var calculated = {
         monthlyPayment: ' -',
         loanAmountAvailable: ' -',
@@ -40,18 +29,19 @@ function calculateValues(state) {
         creditCharge: ' -'
     };
 
-    var amount = parseFloat(state.loanAmount);
-    var monthlyRepayment = parseFloat(state.monthlyRepaymentAmount);
-    var months = parseFloat(state.term);
-    var annualRate = parseFloat(state.apr);
+    var amount = parseFloat(calculatorValues.loanAmount);
+    var monthlyRepayment = parseFloat(calculatorValues.perMonthAmount);
+    var months = parseFloat(calculatorValues.termMonths);
+    var annualRate = parseFloat(calculatorValues.apr);
 
     var monthlyRate, monthlyPayment, totalRepayment, creditCharge;
+
 
     if (isParametersValid(amount, monthlyRepayment, months, annualRate)) {
 
         monthlyRate = Math.pow(((annualRate / 100) + 1), 1 / 12) - 1;
 
-        if (isAnnualRepayment) {
+        if (calculatorValues.isLoanAmount) {
 
             monthlyPayment = (amount * monthlyRate) / (1 - Math.pow((1 + monthlyRate), -months));
             totalRepayment = monthlyPayment * months;
@@ -59,11 +49,11 @@ function calculateValues(state) {
             calculated.monthlyPayment = `£${parseFloat(monthlyPayment).toFixed(2)}`;
         }
         else {
-            loanAmount = (monthlyRepayment * (1 - Math.pow((1 + monthlyRate), -months))) / monthlyRate;
+            amount = (monthlyRepayment * (1 - Math.pow((1 + monthlyRate), -months))) / monthlyRate;
             totalRepayment = monthlyRepayment * months;
-            creditCharge = totalRepayment - loanAmount;
-            calculated.loanAmountAvailable = `£${parseFloat(loanAmount).toFixed(2)}`;
-            calculated.actualLoanAmountAvailable = `£${parseFloat(loanAmount).toFixed(0)}`;
+            creditCharge = totalRepayment - amount;
+            calculated.loanAmountAvailable = `£${parseFloat(amount).toFixed(2)}`;
+            calculated.actualLoanAmountAvailable = `£${parseFloat(amount).toFixed(0)}`;
         }
         calculated.totalRepayment = `£${parseFloat(totalRepayment).toFixed(2)}`;
         calculated.creditCharge = `£${parseFloat(creditCharge).toFixed(2)}`;
@@ -72,8 +62,8 @@ function calculateValues(state) {
     return calculated;
 }
 function isParametersValid(loanAmount, monthlyRepayment, loanDuration, loanApr) {
-    return this.isValidValue('amount', loanAmount) && this.isValidValue('duration', loanDuration) && this.isValidValue('apr', loanApr) &&
-        this.isValidValue('monthlyRepaymentAmount', monthlyRepayment);
+    return isValidValue('amount', loanAmount) && isValidValue('duration', loanDuration) && isValidValue('apr', loanApr) &&
+        isValidValue('monthlyRepaymentAmount', monthlyRepayment);
 }
 function isValidValue(name, value) {
     var loansCalculatorBounds = {

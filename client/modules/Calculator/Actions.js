@@ -2,7 +2,7 @@
  * Created by paulius on 05/09/16.
  */
 export const CALCULATE = 'CALCULATE';
-export const SWITCH_CALCULATOR = 'SWITCH_TYPE';
+export const SWITCH_CALCULATOR_TYPE = 'SWITCH_CALCULATOR_TYPE';
 
 export function calculate(calculatorValues) {
     return {
@@ -11,9 +11,21 @@ export function calculate(calculatorValues) {
     };
 }
 
-export function calculatorType(isLoanAmount) {
+export function switchCalculatorType(isLoanAmount) {
     return {
-        type: SWITCH_CALCULATOR,
+        type: SWITCH_CALCULATOR_TYPE,
         isLoanAmount,
     };
+}
+
+export function fetchCalculatedValues(calculatorValues) {
+    return (dispatch) => {
+        return dispatch(calculate(calculatorValues))
+    }
+}
+
+export function fetchCalculatorType(isLoanAmount) {
+    return dispatch => {
+        return dispatch(switchCalculatorType(isLoanAmount))
+    }
 }

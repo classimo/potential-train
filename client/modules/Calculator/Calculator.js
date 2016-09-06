@@ -1,25 +1,30 @@
 import React, { PropTypes } from 'react';
-import Container from  '../../scripts/Container';
-import Title from '../../scripts/Title';
-import APRInput from '../../scripts/APRInput';
-import LoanAmountInput from '../../scripts/LoanAmountInput';
-import MonthsAmountInput from '../../scripts/MonthsInput';
+import Container from  './components/Container';
+import Title from './components/Title';
+import APRInput from './components/APRInput';
+import LoanAmountInput from './components/LoanAmountInput';
+import MonthlyBudgetInput from './components/MonthlyBudgetInput';
+import MonthsAmountInput from './components/MonthsInput';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import { connect } from 'react-redux';
 import baseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
+import TypeSwitch from './components/TypeSwitch';
 import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
 import Paper from 'material-ui/Paper';
 
 // Import Selectors
 import { getCalculatedValues } from './CalculatorReducer';
-import { getIsLoanAmount } from './CalculatorReducer';
+import { getIsLoanAmount } from './CalculatorSwitchReducer';
+
+// Import Actions
+import { calculate, switchCalculatorType, fetchCalculatorType, fetchCalculatedValues } from './Actions';
 
 injectTapEventPlugin();
 
-class GloLoanCalculator extends React.Component{
+class Calculator extends React.Component{
     componentDidMount() {
-        this.props.dispatch(fetchLeagueTeams(70));
+        this.props.dispatch(fetchCalculatedValues(this.props.calculator));
     }
 
     getChildContext() {
@@ -27,28 +32,52 @@ class GloLoanCalculator extends React.Component{
     }
 
     updateMonths(months){
-        this.props.months = months;
-        this.render();
+        var calculatorValues = this.props.calculator;
+        calculatorValues.termMonths = months;
+        this.props.dispatch(calculate(calculatorValues));
     }
     updateAPR(apr){
-        this.render();
+        var calculatorValues = this.props.calculator;
+        calculatorValues.apr = apr;
+        this.props.dispatch(calculate(calculatorValues));
     }
     updateLoanAmount(loanAmount){
-        this.render();
+        var calculatorValues = this.props.calculator;
+        calculatorValues.loanAmount = loanAmount;
+        this.props.dispatch(calculate(calculatorValues));
+    }
+    switchType(isLoanAmount){
+        var isLA = false;
+        if(isLoanAmount === "loanAmount"){
+            isLA = true;
+        }
+        this.props.dispatch(switchCalculatorType(isLA));
+        var calculatorValues = this.props.calculator;
+        calculatorValues.isLoanAmount = isLA;
+        this.props.dispatch(calculate(calculatorValues));
+    }
+    updateMonthlyBudget(monthlyBudget){
+        var calculatorValues = this.props.calculator;
+        calculatorValues.perMonthAmount = monthlyBudget;
+        this.props.dispatch(calculate(calculatorValues));
     }
     render(){
-        let propsToRender = this.calculate(this.props.loanAmount,this.props.months, this.props.apr, this.props.perMonthAmount, true);
+        let loanAmountOrMonthlyBudgetInput = <LoanAmountInput loanAmount={this.props.calculator.loanAmount} updateLoanAmount={this.updateLoanAmount.bind(this)}/>;
+        if(!this.props.isLoanAmount){
+            loanAmountOrMonthlyBudgetInput = <MonthlyBudgetInput monthlyBudget={this.props.calculator.perMonthAmount} updateMonthlyBudget={this.updateMonthlyBudget.bind(this)} />
+        }
         return(
         <Paper zDepth={1} >
             <Container>
                 <Title text="Loan calculator" />
-                <LoanAmountInput loanAmount={this.props.loanAmount} updateLoanAmount={this.updateLoanAmount.bind(this)}/>
-                <MonthsAmountInput termInMonths={this.props.months} updateMonths={this.updateMonths.bind(this)}/>
-                <APRInput percentage={this.props.apr} updateAPR={this.updateAPR.bind(this)}/>
+                {loanAmountOrMonthlyBudgetInput}
+                <MonthsAmountInput termInMonths={this.props.calculator.termMonths} updateMonths={this.updateMonths.bind(this)}/>
+                <APRInput percentage={this.props.calculator.apr} updateAPR={this.updateAPR.bind(this)}/>
+                <TypeSwitch isLoanAmount={this.props.calculator.isLoanAmount} switchType={this.switchType.bind(this)}/>
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHeaderColumn>Monthly repayments</TableHeaderColumn>
+                            <TableHeaderColumn>{this.props.isLoanAmount ? "Monthly repayments":"Loan amount available"}</TableHeaderColumn>
                             <TableHeaderColumn>Total amount to repay</TableHeaderColumn>
                             <TableHeaderColumn>APR</TableHeaderColumn>
                             <TableHeaderColumn>Total cost of credit</TableHeaderColumn>
@@ -56,10 +85,10 @@ class GloLoanCalculator extends React.Component{
                     </TableHeader>
                     <TableBody>
                         <TableRow>
-                            <TableRowColumn><span>{propsToRender.monthlyPayment}</span></TableRowColumn>
-                            <TableRowColumn><span>{propsToRender.totalRepayment}</span></TableRowColumn>
-                            <TableRowColumn><span>{this.props.apr}</span></TableRowColumn>
-                            <TableRowColumn><span>{propsToRender.creditCharge}</span></TableRowColumn>
+                            <TableRowColumn><span>{this.props.isLoanAmount ? this.props.calculatedValues.monthlyPayment : this.props.calculatedValues.loanAmountAvailable}</span></TableRowColumn>
+                            <TableRowColumn><span>{this.props.calculatedValues.totalRepayment}</span></TableRowColumn>
+                            <TableRowColumn><span>{this.props.calculator.apr} %</span></TableRowColumn>
+                            <TableRowColumn><span>{this.props.calculatedValues.creditCharge}</span></TableRowColumn>
                         </TableRow>
                     </TableBody>
                 </Table>
@@ -69,28 +98,34 @@ class GloLoanCalculator extends React.Component{
     }
 }
 // Actions required to provide data for this component to render in sever side.
-// MainPage.need = [() => { return fetchLeagueTeams(70); }];
-// MainPage.need = [() => { return fetchTeamFixtures(17); }];
-// MainPage.need = [() => { return fetchPosts(); }];
+Calculator.need = [() => { return fetchCalculatedValues(this.props.calculator); }];
 
 // Retrieve data from store as props
 function mapStateToProps(state) {
     return {
-        calculated: getCalculatedValues(state),
+        calculatedValues: getCalculatedValues(state),
         isLoanAmount: getIsLoanAmount(state)
     };
 }
 
-GloLoanCalculator.propTypes = {
-    perMonthAmount: PropTypes.number.isRequired,
-    apr: PropTypes.number.isRequired,
-    loanAmount: PropTypes.number.isRequired,
-    months: PropTypes.number.isRequired,
+Calculator.propTypes = {
+    calculator: PropTypes.shape({
+        perMonthAmount: PropTypes.number.isRequired,
+        isLoanAmount: PropTypes.bool.isRequired,
+        apr: PropTypes.number.isRequired,
+        loanAmount: PropTypes.number.isRequired,
+        termMonths: PropTypes.number.isRequired,
+    }).isRequired,
+    calculatedValues: PropTypes.shape({
+        monthlyPayment: PropTypes.string,
+        totalRepayment: PropTypes.string,
+        creditCharge: PropTypes.string,
+    }),
     dispatch: PropTypes.func.isRequired,
 };
 
-GloLoanCalculator.childContextTypes = {
+Calculator.childContextTypes = {
     muiTheme: React.PropTypes.object.isRequired,
 };
 
-export default connect(mapStateToProps)(GloLoanCalculator);
+export default connect(mapStateToProps)(Calculator);

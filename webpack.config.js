@@ -43,33 +43,37 @@
 /* eslint-disable no-var */
 var webpack = require('webpack');
 var path = require('path');
-
+console.log(__dirname);
 module.exports = {
     entry: [
+        'react-hot-loader/patch',
         'webpack-dev-server/client?http://localhost:5000',
         'webpack/hot/dev-server',
-        './client/scripts/start'
+        './client/index'
     ],
     output: {
         path: __dirname,
         filename: 'bundle.js',
         publicPath: '/static/'
     },
-      resolve: {
-          extensions: ['', '.js', '.jsx'],
-          root: path.resolve(path.join(__dirname, 'source')),
-      },
-      devtool: 'eval-client-map',
-      plugins: [
-          new webpack.HotModuleReplacementPlugin(),
-          new webpack.NoErrorsPlugin()
+    resolve: {
+        extensions: ['', '.js', '.jsx'],
+        modules: [
+            'client',
+            'node_modules',
+        ],
+    },
+    devtool: 'eval-client-map',
+    plugins: [
+        new webpack.HotModuleReplacementPlugin(),
+        new webpack.NoErrorsPlugin()
       ],
     module: {
         loaders: [
             {
                 test: /\.js?$/,
                 loaders: ['babel'],
-                include: path.join(__dirname, 'source')
+                exclude: [/node_modules/, /.+\.config.js/]
             },
             {
                 test: /\.css?$/,
