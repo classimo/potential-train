@@ -1,14 +1,19 @@
 import React, { PropTypes } from 'react';
-import Container from  './Container';
-import Title from './Title';
-import APRInput from './APRInput';
-import LoanAmountInput from './LoanAmountInput';
-import MonthsAmountInput from './MonthsInput';
+import Container from  '../../scripts/Container';
+import Title from '../../scripts/Title';
+import APRInput from '../../scripts/APRInput';
+import LoanAmountInput from '../../scripts/LoanAmountInput';
+import MonthsAmountInput from '../../scripts/MonthsInput';
 import injectTapEventPlugin from 'react-tap-event-plugin';
+import { connect } from 'react-redux';
 import baseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
 import Paper from 'material-ui/Paper';
+
+// Import Selectors
+import { getCalculatedValues } from './CalculatorReducer';
+import { getIsLoanAmount } from './CalculatorReducer';
 
 injectTapEventPlugin();
 
@@ -16,66 +21,11 @@ class GloLoanCalculator extends React.Component{
     componentDidMount() {
         this.props.dispatch(fetchLeagueTeams(70));
     }
-    calculate(loanAmount, term, apr, monthlyRepaymentAmount, isAnnualRepayment) {
 
-        var calculated = {
-            monthlyPayment: ' -', 
-            loanAmountAvailable: ' -', 
-            totalRepayment: ' -', 
-            creditCharge: ' -'
-        };
-        
-        var amount = parseFloat(loanAmount);
-        var monthlyRepayment = parseFloat(monthlyRepaymentAmount);
-        var months = parseFloat(term);
-        var annualRate = parseFloat(apr);
-
-        var monthlyRate, monthlyPayment, totalRepayment, creditCharge;
-
-        if (this.isParametersValid(amount, monthlyRepayment, months, annualRate)) {
-
-            monthlyRate = Math.pow(((annualRate / 100) + 1), 1 / 12) - 1;
-
-            if (isAnnualRepayment) {
-
-                monthlyPayment = (amount * monthlyRate) / (1 - Math.pow((1 + monthlyRate), -months));
-                totalRepayment = monthlyPayment * months;
-                creditCharge = totalRepayment - amount;
-                calculated.monthlyPayment = `£${parseFloat(monthlyPayment).toFixed(2)}`;
-            }
-            else {
-                loanAmount = (monthlyRepayment * (1 - Math.pow((1 + monthlyRate), -months))) / monthlyRate;
-                totalRepayment = monthlyRepayment * months;
-                creditCharge = totalRepayment - loanAmount;
-                calculated.loanAmountAvailable = `£${parseFloat(loanAmount).toFixed(2)}`;
-                calculated.actualLoanAmountAvailable = `£${parseFloat(loanAmount).toFixed(0)}`;
-            }
-            calculated.totalRepayment = `£${parseFloat(totalRepayment).toFixed(2)}`;
-            calculated.creditCharge = `£${parseFloat(creditCharge).toFixed(2)}`;
-        }
-
-        return calculated;
-    };
     getChildContext() {
         return { muiTheme: getMuiTheme(baseTheme) };
     }
-    isParametersValid(loanAmount, monthlyRepayment, loanDuration, loanApr) {
 
-        return this.isValidValue('amount', loanAmount) && this.isValidValue('duration', loanDuration) && this.isValidValue('apr', loanApr) &&
-            this.isValidValue('monthlyRepaymentAmount', monthlyRepayment);
-    }
-    isValidValue(name, value) {
-        var loansCalculatorBounds = {
-
-            amount: { minValue: 100, maxValue: 100000},
-            monthlyRepaymentAmount: { minValue: 10, maxValue: 5000},
-            duration: { minValue: 6, maxValue: 300},
-            apr: { minValue: 0.1, maxValue: 100}
-        };
-        var minValue = loansCalculatorBounds[name].minValue;
-        var maxValue = loansCalculatorBounds[name].maxValue;
-        return !isNaN(value) && value >= minValue && value <= maxValue;
-    }
     updateMonths(months){
         this.props.months = months;
         this.render();
@@ -89,7 +39,7 @@ class GloLoanCalculator extends React.Component{
     render(){
         let propsToRender = this.calculate(this.props.loanAmount,this.props.months, this.props.apr, this.props.perMonthAmount, true);
         return(
-        <Paper  zDepth={1} >
+        <Paper zDepth={1} >
             <Container>
                 <Title text="Loan calculator" />
                 <LoanAmountInput loanAmount={this.props.loanAmount} updateLoanAmount={this.updateLoanAmount.bind(this)}/>
@@ -126,7 +76,8 @@ class GloLoanCalculator extends React.Component{
 // Retrieve data from store as props
 function mapStateToProps(state) {
     return {
-        teams: getLeagueTeams(state),
+        calculated: getCalculatedValues(state),
+        isLoanAmount: getIsLoanAmount(state)
     };
 }
 
@@ -137,13 +88,9 @@ GloLoanCalculator.propTypes = {
     months: PropTypes.number.isRequired,
     dispatch: PropTypes.func.isRequired,
 };
-GloLoanCalculator.defaultProps = {
-    perMonthAmount: 250,
-    apr: 10,
-    loanAmount: 1000,
-    months: 6
-};
 
 GloLoanCalculator.childContextTypes = {
     muiTheme: React.PropTypes.object.isRequired,
 };
+
+export default connect(mapStateToProps)(GloLoanCalculator);

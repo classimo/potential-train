@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import GloLoanCalculator from './App';
+import App from '../modules/App/App';
 
 var divAppContainer = document.getElementById('app-container');
-ReactDOM.render(<GloLoanCalculator/>, divAppContainer);
+ReactDOM.render(<App/>, divAppContainer);
 document.body.appendChild(divAppContainer);
