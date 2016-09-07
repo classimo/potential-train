@@ -22,18 +22,18 @@ export default class App extends Component {
                   title="Glo Loan Calculator"
                   meta={[
                         { charset: 'utf-8' },
-                    {
-                      'http-equiv': 'X-UA-Compatible',
-                      content: 'IE=edge',
-                    },
-                    {
-                      name: 'viewport',
-                      content: 'width=device-width, initial-scale=1',
-                    },
+                        {
+                          'http-equiv': 'X-UA-Compatible',
+                          content: 'IE=edge',
+                        },
+                        {
+                          name: 'viewport',
+                          content: 'width=device-width, initial-scale=1',
+                        },
                   ]}
                 />
                 <Header />
-                    <section className="AppContainer">
+                    <section className={style.AppContainer}>
                         {this.props.children}
                     </section>
                 <Footer />

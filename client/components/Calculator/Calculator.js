@@ -1,5 +1,4 @@
 import React, { PropTypes } from 'react';
-import Container from './components/Container';
 import Title from './components/Title/Title';
 import APRInput from './components/APRInput';
 import LoanAmountInput from './components/LoanAmountInput';
@@ -7,8 +6,8 @@ import MonthlyBudgetInput from './components/MonthlyBudgetInput';
 import MonthsAmountInput from './components/MonthsInput';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import { connect } from 'react-redux';
-import baseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
+// import baseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
+// import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import TypeSwitch from './components/TypeSwitch';
 import Row from 'muicss/lib/react/row';
 import Col from 'muicss/lib/react/col';
@@ -26,10 +25,6 @@ import style from './Calculator.css';
 class Calculator extends React.Component {
   componentDidMount() {
     this.props.dispatch(fetchCalculatedValues(this.props.calculator));
-  }
-
-  getChildContext() {
-    return { muiTheme: getMuiTheme(baseTheme) };
   }
   switchType(isLoanAmount) {
     let isLA = false;
@@ -52,7 +47,7 @@ class Calculator extends React.Component {
       loanAmountOrMonthlyBudgetInput = <MonthlyBudgetInput monthlyBudget={this.props.calculator.perMonthAmount} onChange={this.onChange.bind(this)} />;
     }
     return (
-        <div className="Calculator">
+        <div className={style.Calculator}>
             <Row>
                 <Col md="9" xs="6">
                     <Title text="Loan calculator" />
@@ -119,8 +114,8 @@ Calculator.propTypes = {
   dispatch: PropTypes.func.isRequired,
 };
 
-Calculator.childContextTypes = {
-  muiTheme: React.PropTypes.object.isRequired,
-};
+// Calculator.childContextTypes = {
+//   muiTheme: React.PropTypes.object.isRequired,
+// };
 
 export default connect(mapStateToProps)(Calculator);

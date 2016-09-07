@@ -8,9 +8,14 @@ import Row from 'muicss/lib/react/row';
 import Col from 'muicss/lib/react/col';
 import Calculator from '../../components/Calculator/Calculator';
 import Paper from 'material-ui/Paper';
+import baseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
+import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
 
 export default class MainPage extends Component {
+    getChildContext() {
+        return {muiTheme: getMuiTheme(baseTheme)};
+    }
   render() {
     const defaultCalculatorValues = {
       perMonthAmount: 250,
@@ -27,7 +32,7 @@ export default class MainPage extends Component {
                             <Calculator calculator={defaultCalculatorValues} />
                         </Col>
                         <Col md="4">
-                            <Paper zDepth={0} />
+                            <Paper zDepth={1} />
                         </Col>
                     </Row>
                 </Paper>
@@ -35,3 +40,6 @@ export default class MainPage extends Component {
         );
   }
 }
+MainPage.childContextTypes = {
+    muiTheme: React.PropTypes.object.isRequired,
+};

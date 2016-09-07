@@ -11,13 +11,13 @@ import styles from './Header.css';
 
 export function Header(props) {
   return (
-        <div className="Header">
-            <div className="menu">
+        <div className={styles.Header}>
+            <div className={styles.menu}>
                 <ul>
                     {/* <Logo />*/}
                     {/* <li><FormattedMessage id="switchLanguage" /></li> */}
                     {/* {languageNodes}*/}
-                    <li className="selected">menu 1</li>
+                    <li className={styles.selected}>menu 1</li>
                     <li>menu 2</li>
                     <li>menu 3</li>
                     <li>menu 4</li>

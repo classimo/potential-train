@@ -9,6 +9,7 @@ import { Provider } from 'react-redux';
 import { Router, browserHistory } from 'react-router';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
+
 // Import Routes
 import routes from './routes';
 
@@ -27,6 +28,7 @@ export default function App(props) {
                 </Router>
             </MuiThemeProvider>
         </Provider>
+
     );
 }
 
