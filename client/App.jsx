@@ -16,10 +16,10 @@ import routes from './routes';
 require('muicss/lib/css/mui.css');
 
 // Base stylesheet
-// import styles from 'styles/main.css';
+require('./styles/global.css');
 
 export default function App(props) {
-    return (
+  return (
         <Provider store={props.store}>
             <MuiThemeProvider>
                 <Router history={browserHistory}>
@@ -31,5 +31,5 @@ export default function App(props) {
 }
 
 App.propTypes = {
-    store: React.PropTypes.object.isRequired,
+  store: React.PropTypes.object.isRequired,
 };

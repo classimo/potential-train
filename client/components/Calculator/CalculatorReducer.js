@@ -27,7 +27,7 @@ function calculateValues(calculatorValues) {
         loanAmountAvailable: ' -',
         totalRepayment: ' -',
         creditCharge: ' -'
-    };
+};
 
     var amount = parseFloat(calculatorValues.loanAmount);
     var monthlyRepayment = parseFloat(calculatorValues.perMonthAmount);
